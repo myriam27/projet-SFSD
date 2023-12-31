@@ -4,12 +4,15 @@
 #define max 1000
 
 
-typedef struct enregistrement*champ;
+typedef struct enregistrement*champ; // ALSO WHY POINTEUR ???
 typedef struct enregistrement{
     char nom[15];
     int taille;
     char* donnee;
+    int matricule;
+    char obvs; // obvs c'est observasion on va procéder A = admis et D = doublons 
     champ svt;
+    int sup; // si sup=0 on ne supprime pas sup=1 c'est le contraire ( puisque on va faire suppression logique ) 
 }enregistrement;
 
 typedef struct type* typebloc
@@ -18,15 +21,24 @@ typedef struct type{
     champ Tab[max];
       }type;
 
+// j'ai ajouté ça ( LUNA ) 
+// there is diffrence between this two 
 typedef struct typebloc buffer;
+struct TypeBloc
+{
+    char enrg[max];
+    int suivant;
+};
 
-typedef struct entete{
+
+typedef struct entete {
     int nbr-pre; //le num du premier bloc
-    int nbr-ins; // le num de l'element insereé
-    int nbr-sup; //le num de l'element suprimé
+    int nbr-ins; // le num de l'element qu'on veut insérer
+    int nbr-sup; //le num de l'element  a suprimé
     int nbr-der; //le num du dernier bloc
     int pos-vide-lb; // la premiere position vide dans le dernier bloc
-    unsigned long long last_key;
+    int nb-bloc // nombre total des blocs
+    unsigned long long last_key; // WHY THIS ????
 }
 void ouvrir_f(FILE* f,char* nomf,char mode){
     if((mode=='A')||(mode=='a'))
