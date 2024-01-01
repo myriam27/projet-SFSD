@@ -4,7 +4,7 @@
 #define max 1000
 
 
-typedef struct enregistrement*champ; // ALSO WHY POINTEUR ???
+typedef struct enregistrement*champ; // ALSO WHY POINTEUR ??? 
 typedef struct enregistrement{
     char nom[15];
     int taille;
@@ -23,8 +23,8 @@ typedef struct type{
 
 // j'ai ajouté ça ( LUNA ) 
 // there is diffrence between this two 
-typedef struct typebloc buffer;
-struct TypeBloc
+typedef struct Typebloc buffer; //(meriem) j'ai change de typebloc a Typebloc
+struct TypeBloc 
 {
     char enrg[max];
     int suivant;
@@ -122,6 +122,21 @@ void ouvrir_f(FILE* f,char* nomf,char mode){
         rewind(*f);
         fclose(*f);
     }
+
+//operations de lecture ecriture (meriem)
+
+void Liredir(FILE *f, int i, buffer* Buf){
+    entete e;
+    fseek(f, sizeof(e)+(i-1)*sizeof(Typebloc),SEEK_SET);
+    fread(&(*Buf),sizeof(Typebloc),1,f);
+}
+
+void Ecriredir(FILE **f, int i, Typebloc Buf){
+    entete e;
+    fseek(*f, sizeof(e)+(i-1)*sizeof(Typebloc),SEEK_SET);
+    fwrite(&Buf,sizeof(Typebloc),1,*f);
+}
+
 
 int main(){
 
