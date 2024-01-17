@@ -3,7 +3,8 @@
 #include <string.h>
 #define max 1000
 
-
+//essai de cration enregistrement
+<<<<<<< HEAD
 typedef struct CHAMP*champ; 
 typedef struct CHAMP{       
     char* nom;                    
@@ -29,35 +30,102 @@ void ajouter(champ tete,char nom[],char donnee[]){
         p->svt=nouv;
     }
     }
- 
-typedef struct type* typebloc;
-typedef struct type{
-    typebloc adr;   // ici nrmlm les blocs sont chainee psq le fichier est de type liste donc on le declare 
-    champ Tab[max]; // de type pointeur
-      }type;
+ #define taille 20
 
-typedef struct typebloc buffer;
+
+typedef struct enregistrement*champ; 
+typedef struct enregistrement{
+    char nom[15];
+    char size[taille]; //Un champ pour sauvegarder la taille de l'enregistrement
+    int matricule;
+    char obvs; // obvs c'est observasion on va procéder A = admis et D = doublons 
+    champ svt;
+    char sup; // si sup=0 on ne supprime pas sup=1 c'est le contraire ( puisque on va faire suppression logique ) 
+}enregistrement;
+
+typedef struct Typebloc Buffer;
+Typedef struct TypeBloc{
+    char enrg[max];
+    int suivant;
+}Typebloc;
+
 
 typedef struct entete{
-    int nbrpre; //le num du premier bloc
-    int nbrins; // le nombre de l'element insereé
-    int nbrsup; //le nombre d'element suprimé
-    int nbrder; //le num du dernier bloc
-    int posvidelb; // la premiere position vide dans le dernier bloc
-    unsigned long long last_key; 
+    int nbrpre; // l'adress du premier bloc
+    int nbrins; // le nbr d'elements qu'on veut insérer
+    int nbrsup; //le nbr d'elements  supprime
+    int nbrder; //l'adresse du dernier bloc
+    int posvidelb; // la premiere position vide dans le dernier bloc //meriem: c'est quoi le but?
+    int nb_bloc; // nombre total des blocs
 }entete;
 
-void ouvrirf(FILE* f,char* nomf,char mode){//j ai un probleme ici et je n ai pa su le regler     
+// la declaration du fichier 
+typedef struct Fichier{
+    entete head; // champs de l'entete 
+    FILE *file;
+}Fichier;
+
+int Entete(Fichier* fichier,int i){
+    switch (i)
+    {
+    case 1 : return fichier->head.nbrpre;
+    case 2 : return fichier->head.nbrins;
+    case 3 : return fichier->head.nbrsup;
+    case 4:  return fichier->head.nbrder;
+    case 5: return fichier->head.nb_bloc;
+    case 6: return fichier->head.posvidelb;
+    default:
+        printf(" ERROR !! ");
+        return 0;
+    }
+
+}
+void Aff_Entete( Fichier *fichier , int i, int valeur)
+{
+    switch (i)
+    {
+        case 1: {
+            fichier->head.nbrpre = valeur;
+            break;
+        }
+        case 2: {
+            fichier->head.nbrins = valeur;
+            break;
+        }
+        case 3: {
+            fichier->head.nbrsup = valeur;
+            break;
+        }
+        case 4: {
+            fichier->head.nbrder= valeur;
+            break;
+        }
+        case 5: {
+            fichier->head.nb_bloc = valeur;
+            break;
+        }
+        case 6: {
+            fichier->head.posvidelb = valeur;
+            break;
+        }
+        default: {
+            printf(" ERROR !!\n  ");
+            break;
+        }
+    }
+}
+
+void ouvrir_f(Fichier* f,char* nomf,char mode){
     if((mode=='A')||(mode=='a'))
-        f=fopen(nomf,"rb+");
+        f->file =fopen(nomf,"rb+");
     else{
          if((mode=='N')||(mode=='n')){
             
-             f = fopen(nomf,"wb+");                       
-             Aff_Entete(*f,1,-1);       // iici aussi                
-             Aff_Entete(*f,2,0);                         
-             Aff_Entete(*f,3,0);                        
-             Aff_Entete(*f,4,-1);                         
+             f->file = fopen(nomf,"wb+");                       
+             Aff_Entete(f,1,-1);                        
+             Aff_Entete(f,2,0);                         
+             Aff_Entete(f,3,0);                        
+             Aff_Entete(f,4,-1);                         
              Aff_Entete(f,5,0);                         
              unsigned long long initial_key = 0;
              Aff_Entete(f,6,initial_key);
@@ -65,70 +133,29 @@ void ouvrirf(FILE* f,char* nomf,char mode){//j ai un probleme ici et je n ai pa 
 
          }
     }
-    void fermerf(FILE* f){
-        rewind(f);
-        fclose(f);
+void fermer_f(Fichier* f){
+        rewind(f->file);
+        fwrite(&(f->head),sizeof(Entete),1,f->file);//sauvgarder l'entete
+        rewind(f->file);
+         fclose(f->file);
     }
-   void Aff_Entete(FILE* f, int p, int i){
-    entete e;
-    if(f!=(NULL  )){
-            rewind(f);
-            fread(&e,sizeof(entete),1,f); // pour lire le bloc 
-            if(p==1){ e.nbrpre = i ;} //  Le numero du premier bloc 
-            if(p==2){ e.nbrins =i ;} //  Le nombre d'elements inseres
-            if(p==3){ e.nbrsup =i ;} //  Le nombre d'elements supprimes 
-            if(p==4){ e.nbrder =i ;} //  Le numero du dernier bloc
-            if(p==5){ e.posvidelb = i;} //  La premiere position vide dans le dernier bloc
-            if(p==6){ e.last_key = i;}
-            if ((p < 1) || (p > 6)) {
-                printf("\n");
-                printf("numero de caracteristique n'existe pas! \n");
-            }
-            rewind(f);
-            fwrite(&e,sizeof(entete),1,f);
-        }
-}
-int Entete_F(FILE* f,int p){
-    entete e;
-    if(f!=NULL){
-            rewind(f);
-            fread(&e,sizeof(e),1,f);
-            if(p==1){return e.nbrpre;} // | Le numero du premier bloc
-            if(p==2){return e.nbrins;} // | Le nombre d'elements inseres
-            if(p==3){return e.nbrsup;} // | Le nombre d'elements supprimes logiquement
-            if(p==4){return e.nbrder;} // | Le numero du dernier bloc
-            if(p==5){return e.posvidelb;} // | la premiere position vide dans le dernier bloc
-            if(p==6){return e.last_key;}
-            if ((p < 1) || (p > 6)) {
-                printf("\n");
-                printf("numero de caracteristique n'existe pas! \n");
-            }
-        }
+    //operations de lecture ecriture (meriem)
+
+//lire le bloc
+void LireDir(Fichier* f, int i, Buffer* buf)
+{
+    fseek(f->file,(sizeof(f->head)+sizeof(buf)*(i-1)),SEEK_SET); //Positionner le curseur à l'adresse i
+    fread(buf,sizeof(buf),1,f->file); //Lire le bloc
 }
 
-void lirebloc(FILE* f,int i,typebloc* buff){
-    entete e;
-    fseek(f,sizeof(e)+(i-1)*sizeof(typebloc),SEEK_SET);
-    fread(&(*buff),sizeof(typebloc),1,f);
-}
-void ecrirebloc(FILE* f,int i,typebloc buff){
-    entete e;
-     fseek(f,sizeof(e)+(i-1)*sizeof(typebloc),SEEK_SET);
-    fwrite(&buff,sizeof(typebloc),1,f);
+//Ecrire le bloc à l'adresse i
+void EcrireDir(Fichier* f, int i, Buffer* buf)
+{
+    fseek(f->file,(sizeof(f->head)+sizeof(buf)*(i-1)),SEEK_SET); //Positionner le curseur à l'adresse i
+    fwrite(buf,sizeof(buf),1,f->file); //Ecrire le bloc
 }
 
- void AllocBloc(FILE* fichier){
 
-    buffer* buf = (buffer)malloc(sizeof(buffer)); //Allouer de l'espace mémoire pour le buffer//ici je ne sais pas prq il y a une erreur
-    lirebloc(fichier,Entete_F(fichier,5),buf); //Lire le dernier bloc de la liste
-    buf->svt = Entete_F(fichier,4) + 1; //Mettre à jour le champ suivant avec le nombre de blocs total de la liste + 1 (une nouvelle adresse)
-    ecrirebloc(fichier,Entete_F(fichier,5),buf); //Ecrire le dernier bloc
-    strcpy(buf->tab,""); //Initialiser le buffer à une chaine de caractères vide
-    buf->svt= -1; //Initialiser le champ suivant à -1 (NIL)
-    ecrirebloc(fichier,Entete_F(fichier,4) + 1,buf); //Ecrire le buffer à l'adresse (nombre de blocs total de la liste + 1)
-    Aff_Entete(fichier,4,Entete_F(fichier,4)+1); //Incrémenter le nombre total de blocs de la liste
-    Aff_Entete(fichier,5,Entete_F(fichier,4)); //Mettre à jour le champ qui correspond à l'adresse du dernier bloc de la liste
- }
 
     int main() {
         //creation enregistrement
@@ -148,23 +175,4 @@ void ecrirebloc(FILE* f,int i,typebloc buff){
         // entrer le prochain champ
         printf("Entrez le nom du champ (ou 'exit' pour quitter) : ");
     }
-
-    // Afficher les champs
-    champ cree;
-      cree = tete;
-    while (cree != NULL) {// a partir d ici le programme ne fontionne pas 
-        printf("Nom: %s, Valeur: %s\n", cree->nom, cree->donnee);
-        cree = cree->svt;
     }
-
-    // Libération de la mémoire
-    champ temp;
-    while (tete != NULL) {
-        temp = tete;
-        tete = tete->svt;
-        free(temp->donnee);
-        free(temp);
-    }
-
-    return 0;
-}
